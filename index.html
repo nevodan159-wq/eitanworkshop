@@ -213,6 +213,46 @@
     .card-title { font-size: 1.05rem; font-weight: 700; }
     .card-year  { font-size: 0.82rem; color: var(--muted); }
 
+    /* inline editable stats */
+    .card-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      border-top: 1px solid #f0f0f0;
+      padding-top: 8px;
+      margin-top: 2px;
+    }
+
+    .stat-box {
+      background: #f9f9f9;
+      border: 1.5px solid #eee;
+      border-radius: 8px;
+      padding: 6px 10px;
+    }
+
+    .stat-box label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .stat-box input {
+      width: 100%;
+      border: none;
+      background: transparent;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      font-family: inherit;
+      padding: 0;
+    }
+
+    .stat-box input:focus { outline: none; color: var(--accent); }
+
     .card-notes {
       font-size: 0.85rem;
       color: #444;
@@ -584,6 +624,24 @@
         <div class="card-body">
           <div class="card-title">${escHtml(b.model || '(ללא שם)')}</div>
           ${b.year ? `<div class="card-year">שנה: ${b.year}</div>` : ''}
+          <div class="card-stats">
+            <div class="stat-box">
+              <label>⏱ שעות עבודה</label>
+              <input type="number" min="0" step="0.5"
+                value="${b.hours || ''}"
+                placeholder="0"
+                data-id="${b.id}" data-field="hours"
+                onchange="updateField(this)" />
+            </div>
+            <div class="stat-box">
+              <label>🔩 עלות חלקים (₪)</label>
+              <input type="number" min="0" step="1"
+                value="${b.parts_cost || ''}"
+                placeholder="0"
+                data-id="${b.id}" data-field="parts_cost"
+                onchange="updateField(this)" />
+            </div>
+          </div>
           ${b.notes ? `<div class="card-notes">${escHtml(b.notes)}</div>` : ''}
           <div class="card-actions">
             <button data-id="${b.id}" data-action="edit">✏️ עריכה</button>
@@ -753,6 +811,18 @@
       alert('שגיאה בהעלאת תמונה: ' + err.message);
     }
   });
+
+  // ── Inline field update ───────────────────────────────────
+  async function updateField(input) {
+    const id    = input.dataset.id;
+    const field = input.dataset.field;
+    const value = input.value === '' ? null : Number(input.value);
+    try {
+      await col.doc(id).update({ [field]: value, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    } catch (err) {
+      alert('Error saving: ' + err.message);
+    }
+  }
 
   // ── Delete ─────────────────────────────────────────────────
   async function deleteBike(id) {
