@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>מעקב אופנועים — הסדנה</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f4f4f4;
+      --card: #ffffff;
+      --border: #ddd;
+      --accent: #e85d04;
+      --text: #1a1a1a;
+      --muted: #666;
+      --radius: 10px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1a1a1a;
+      color: #fff;
+      padding: 20px 20px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    header p {
+      font-size: 0.78rem;
+      color: #aaa;
+      margin-top: 2px;
+    }
+
+    #add-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── FILTER BAR ── */
+    .filter-bar {
+      padding: 14px 16px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .filter-bar button {
+      border: 1.5px solid var(--border);
+      background: #fff;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      white-space: nowrap;
+      color: var(--muted);
+      transition: all 0.15s;
+    }
+
+    .filter-bar button.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* ── GRID ── */
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      padding: 16px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.15s;
+    }
+
+    .card:active { transform: scale(0.98); }
+
+    /* photo area */
+    .card-photo {
+      width: 100%;
+      height: 180px;
+      background: #e8e8e8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: #aaa;
+      font-size: 0.8rem;
+    }
+
+    .photo-placeholder svg { width: 36px; height: 36px; opacity: 0.5; }
+
+    .photo-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .card-photo:hover .photo-overlay { opacity: 1; }
+
+    .photo-overlay span {
+      color: #fff;
+      font-size: 0.8rem;
+      background: rgba(0,0,0,0.5);
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+
+    /* badges row */
+    .card-badges {
+      padding: 10px 14px 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      border-radius: 4px;
+      padding: 3px 8px;
+      letter-spacing: 0.3px;
+    }
+
+    .badge-own   { background: #dbeafe; color: #1d4ed8; }
+    .badge-other { background: #fef3c7; color: #92400e; }
+
+    .badge-test-yes  { background: #d1fae5; color: #065f46; }
+    .badge-test-no   { background: #fee2e2; color: #991b1b; }
+    .badge-test-na   { background: #f3f4f6; color: #6b7280; }
+
+    .badge-status { background: #f3f4f6; color: #374151; }
+    .badge-status.waiting { background: #fef9c3; color: #713f12; }
+    .badge-status.ready   { background: #d1fae5; color: #065f46; }
+    .badge-status.inwork  { background: #e0e7ff; color: #3730a3; }
+
+    /* card body */
+    .card-body {
+      padding: 10px 14px 14px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .card-year {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .card-notes {
+      font-size: 0.85rem;
+      color: #444;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      border-top: 1px solid #f0f0f0;
+      padding-top: 8px;
+      margin-top: 4px;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .card-actions button {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      background: #fff;
+      border-radius: 6px;
+      padding: 7px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .card-actions button:hover { background: #f5f5f5; }
+    .card-actions .btn-del { color: #e53e3e; border-color: #fecaca; }
+    .card-actions .btn-del:hover { background: #fef2f2; }
+
+    /* empty state */
+    #empty {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+
+    #empty svg { width: 56px; opacity: 0.25; margin-bottom: 12px; }
+    #empty p { font-size: 0.95rem; }
+
+    /* ── MODAL ── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 100;
+      padding: 0;
+    }
+
+    @media (min-width: 600px) {
+      .modal-backdrop { align-items: center; padding: 20px; }
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 16px 16px 0 0;
+      padding: 24px 20px 32px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 92vh;
+      overflow-y: auto;
+    }
+
+    @media (min-width: 600px) {
+      .modal { border-radius: 16px; }
+    }
+
+    .modal h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .form-row {
+      margin-bottom: 14px;
+    }
+
+    .form-row label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .form-row input,
+    .form-row select,
+    .form-row textarea {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--text);
+      background: #fff;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .form-row textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    .form-row input:focus,
+    .form-row select:focus,
+    .form-row textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .form-two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* photo upload in modal */
+    .photo-upload-area {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .photo-upload-area img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-upload-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: #aaa;
+      font-size: 0.82rem;
+      pointer-events: none;
+      position: relative;
+      z-index: 1;
+    }
+
+    .photo-upload-label svg { width: 30px; opacity: 0.5; }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .modal-actions button {
+      flex: 1;
+      padding: 13px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-save {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-cancel {
+      background: #f0f0f0;
+      color: var(--text);
+    }
+
+    /* hidden file input */
+    .hidden-input { display: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🔧 הסדנה — מעקב אופנועים</h1>
+    <p id="count-label">טוען...</p>
+  </div>
+  <button id="add-btn">+ הוסף</button>
+</header>
+
+<div class="filter-bar">
+  <button class="active" data-filter="all">הכל</button>
+  <button data-filter="inwork">בעבודה</button>
+  <button data-filter="waiting">ממתין לחלקים</button>
+  <button data-filter="ready">מוכן</button>
+  <button data-filter="own">שלנו</button>
+  <button data-filter="other">של לקוח</button>
+</div>
+
+<div id="grid"></div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-backdrop hidden-input" id="modal">
+  <div class="modal">
+    <h2 id="modal-title">אופנוע חדש</h2>
+
+    <div class="form-two-col">
+      <div class="form-row">
+        <label>דגם / שם</label>
+        <input type="text" id="f-model" placeholder="Honda CB500" />
+      </div>
+      <div class="form-row">
+        <label>שנה</label>
+        <input type="number" id="f-year" placeholder="2010" min="1940" max="2030" />
+      </div>
+    </div>
+
+    <div class="form-two-col">
+      <div class="form-row">
+        <label>סטטוס</label>
+        <select id="f-status">
+          <option value="inwork">בעבודה</option>
+          <option value="waiting">ממתין לחלקים</option>
+          <option value="ready">מוכן</option>
+          <option value="other">אחר</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>בעלות</label>
+        <select id="f-owner">
+          <option value="own">שלנו</option>
+          <option value="other">של לקוח</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>טסט (רישיון רכב)</label>
+      <select id="f-test">
+        <option value="yes">יש טסט תקף</option>
+        <option value="no">אין טסט</option>
+        <option value="na">לא רלוונטי</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label>תמונה</label>
+      <div class="photo-upload-area" id="photo-area">
+        <div class="photo-upload-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3 16l4-4 4 4 4-6 4 6"/>
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+          </svg>
+          <span>לחץ לבחירת תמונה</span>
+        </div>
+      </div>
+      <input type="file" id="f-photo" accept="image/*" class="hidden-input" />
+    </div>
+
+    <div class="form-row">
+      <label>פירוט חופשי</label>
+      <textarea id="f-notes" placeholder="תיאור עבודה, הערות, חלקים נדרשים..."></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" id="cancel-btn">ביטול</button>
+      <button class="btn-save" id="save-btn">שמור</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="card-photo-input" accept="image/*" class="hidden-input" />
+
+<script>
+  const STORE_KEY = 'moto_tracker_v1';
+  let bikes = JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
+  let editingId = null;
+  let pendingPhotoCardId = null;
+
+  // ── Persistence ──────────────────────────────────────────
+  function save() {
+    localStorage.setItem(STORE_KEY, JSON.stringify(bikes));
+  }
+
+  function newId() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2);
+  }
+
+  // ── Render ───────────────────────────────────────────────
+  let currentFilter = 'all';
+
+  function render() {
+    const grid = document.getElementById('grid');
+    const filtered = bikes.filter(b => {
+      if (currentFilter === 'all')     return true;
+      if (currentFilter === 'own')     return b.owner === 'own';
+      if (currentFilter === 'other')   return b.owner === 'other';
+      return b.status === currentFilter;
+    });
+
+    document.getElementById('count-label').textContent =
+      bikes.length === 0 ? 'אין אופנועים עדיין'
+      : `${bikes.length} אופנוע${bikes.length !== 1 ? 'ים' : ''}`;
+
+    grid.innerHTML = '';
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `
+        <div id="empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M8 12h8M12 8v8"/>
+          </svg>
+          <p>אין אופנועים להצגה בסינון הנוכחי.</p>
+        </div>`;
+      return;
+    }
+
+    filtered.forEach(b => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.id = b.id;
+
+      const statusLabel = { inwork: 'בעבודה', waiting: 'ממתין לחלקים', ready: 'מוכן', other: b.statusOther || 'אחר' };
+      const statusClass = { inwork: 'inwork', waiting: 'waiting', ready: 'ready', other: '' };
+      const testLabel   = { yes: '✓ טסט תקף', no: '✗ אין טסט', na: 'טסט N/A' };
+      const testClass   = { yes: 'badge-test-yes', no: 'badge-test-no', na: 'badge-test-na' };
+
+      card.innerHTML = `
+        <div class="card-photo" data-id="${b.id}" data-action="photo">
+          ${b.photo
+            ? `<img src="${b.photo}" alt="${b.model}" />`
+            : `<div class="photo-placeholder">
+                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+                   <rect x="3" y="3" width="18" height="18" rx="2"/>
+                   <circle cx="8.5" cy="8.5" r="1.5"/>
+                   <path d="M21 15l-5-5L5 21"/>
+                 </svg>
+                 <span>הוסף תמונה</span>
+               </div>`}
+          <div class="photo-overlay"><span>החלף תמונה</span></div>
+        </div>
+        <div class="card-badges">
+          <span class="badge ${b.owner === 'own' ? 'badge-own' : 'badge-other'}">${b.owner === 'own' ? 'שלנו' : 'של לקוח'}</span>
+          <span class="badge badge-status ${statusClass[b.status]}">${statusLabel[b.status] || b.status}</span>
+          <span class="badge ${testClass[b.test]}">${testLabel[b.test]}</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">${b.model || '(ללא שם)'}</div>
+          <div class="card-year">${b.year ? 'שנה: ' + b.year : ''}</div>
+          ${b.notes ? `<div class="card-notes">${escHtml(b.notes)}</div>` : ''}
+          <div class="card-actions">
+            <button data-id="${b.id}" data-action="edit">✏️ עריכה</button>
+            <button class="btn-del" data-id="${b.id}" data-action="delete">🗑 מחק</button>
+          </div>
+        </div>`;
+      grid.appendChild(card);
+    });
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Filter buttons ────────────────────────────────────────
+  document.querySelectorAll('.filter-bar button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-bar button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      render();
+    });
+  });
+
+  // ── Grid interactions (delegation) ───────────────────────
+  document.getElementById('grid').addEventListener('click', e => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+    if (action === 'edit')   openModal(id);
+    if (action === 'delete') deleteBike(id);
+    if (action === 'photo')  openPhotoForCard(id);
+  });
+
+  // ── Modal ────────────────────────────────────────────────
+  const modal = document.getElementById('modal');
+
+  function openModal(id) {
+    editingId = id || null;
+    document.getElementById('modal-title').textContent = id ? 'עריכת אופנוע' : 'אופנוע חדש';
+    const b = id ? bikes.find(x => x.id === id) : null;
+    document.getElementById('f-model').value  = b?.model  || '';
+    document.getElementById('f-year').value   = b?.year   || '';
+    document.getElementById('f-status').value = b?.status || 'inwork';
+    document.getElementById('f-owner').value  = b?.owner  || 'own';
+    document.getElementById('f-test').value   = b?.test   || 'na';
+    document.getElementById('f-notes').value  = b?.notes  || '';
+
+    const area = document.getElementById('photo-area');
+    const existingImg = area.querySelector('img');
+    if (existingImg) existingImg.remove();
+    if (b?.photo) {
+      const img = document.createElement('img');
+      img.src = b.photo;
+      area.insertBefore(img, area.firstChild);
+    }
+    modal._pendingPhoto = b?.photo || null;
+
+    modal.style.display = 'flex';
+    modal.classList.remove('hidden-input');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+    editingId = null;
+    modal._pendingPhoto = null;
+    document.getElementById('f-photo').value = '';
+  }
+
+  document.getElementById('add-btn').addEventListener('click', () => openModal(null));
+  document.getElementById('cancel-btn').addEventListener('click', closeModal);
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+  // Photo in modal
+  document.getElementById('photo-area').addEventListener('click', () => {
+    document.getElementById('f-photo').click();
+  });
+
+  document.getElementById('f-photo').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      modal._pendingPhoto = ev.target.result;
+      const area = document.getElementById('photo-area');
+      let img = area.querySelector('img');
+      if (!img) { img = document.createElement('img'); area.insertBefore(img, area.firstChild); }
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Save
+  document.getElementById('save-btn').addEventListener('click', () => {
+    const model = document.getElementById('f-model').value.trim();
+    if (!model) { document.getElementById('f-model').focus(); return; }
+
+    const data = {
+      model,
+      year:   document.getElementById('f-year').value.trim(),
+      status: document.getElementById('f-status').value,
+      owner:  document.getElementById('f-owner').value,
+      test:   document.getElementById('f-test').value,
+      notes:  document.getElementById('f-notes').value.trim(),
+      photo:  modal._pendingPhoto || null,
+    };
+
+    if (editingId) {
+      const idx = bikes.findIndex(b => b.id === editingId);
+      if (idx !== -1) bikes[idx] = { ...bikes[idx], ...data };
+    } else {
+      bikes.unshift({ id: newId(), ...data });
+    }
+    save();
+    render();
+    closeModal();
+  });
+
+  // ── Per-card photo update ─────────────────────────────────
+  function openPhotoForCard(id) {
+    pendingPhotoCardId = id;
+    document.getElementById('card-photo-input').click();
+  }
+
+  document.getElementById('card-photo-input').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file || !pendingPhotoCardId) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const idx = bikes.findIndex(b => b.id === pendingPhotoCardId);
+      if (idx !== -1) { bikes[idx].photo = ev.target.result; save(); render(); }
+      pendingPhotoCardId = null;
+      e.target.value = '';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // ── Delete ────────────────────────────────────────────────
+  function deleteBike(id) {
+    const b = bikes.find(x => x.id === id);
+    if (!b) return;
+    if (!confirm(`למחוק את "${b.model}"?`)) return;
+    bikes = bikes.filter(x => x.id !== id);
+    save();
+    render();
+  }
+
+  // ── Init ─────────────────────────────────────────────────
+  modal.style.display = 'none';
+  render();
+</script>
+</body>
+</html>
