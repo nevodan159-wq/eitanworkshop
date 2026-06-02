@@ -35,16 +35,8 @@
       gap: 12px;
     }
 
-    header h1 {
-      font-size: 1.25rem;
-      font-weight: 700;
-    }
-
-    header p {
-      font-size: 0.78rem;
-      color: #aaa;
-      margin-top: 2px;
-    }
+    header h1 { font-size: 1.25rem; font-weight: 700; }
+    header p  { font-size: 0.78rem; color: #aaa; margin-top: 2px; }
 
     #add-btn {
       background: var(--accent);
@@ -59,7 +51,18 @@
       flex-shrink: 0;
     }
 
-    /* ── FILTER BAR ── */
+    /* sync indicator */
+    #sync-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      display: inline-block;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    #sync-dot.syncing { background: #f59e0b; }
+    #sync-dot.error   { background: #ef4444; }
+
     .filter-bar {
       padding: 14px 16px;
       display: flex;
@@ -88,7 +91,6 @@
       font-weight: 600;
     }
 
-    /* ── GRID ── */
     #grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -96,7 +98,6 @@
       padding: 16px;
     }
 
-    /* ── CARD ── */
     .card {
       background: var(--card);
       border-radius: var(--radius);
@@ -104,12 +105,8 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      transition: transform 0.15s;
     }
 
-    .card:active { transform: scale(0.98); }
-
-    /* photo area */
     .card-photo {
       width: 100%;
       height: 180px;
@@ -122,11 +119,7 @@
       overflow: hidden;
     }
 
-    .card-photo img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    .card-photo img { width: 100%; height: 100%; object-fit: cover; }
 
     .photo-placeholder {
       display: flex;
@@ -160,7 +153,29 @@
       border-radius: 4px;
     }
 
-    /* badges row */
+    /* uploading spinner on card photo */
+    .photo-uploading {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 0.85rem;
+      gap: 8px;
+    }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     .card-badges {
       padding: 10px 14px 0;
       display: flex;
@@ -173,22 +188,20 @@
       font-weight: 600;
       border-radius: 4px;
       padding: 3px 8px;
-      letter-spacing: 0.3px;
     }
 
     .badge-own   { background: #dbeafe; color: #1d4ed8; }
     .badge-other { background: #fef3c7; color: #92400e; }
 
-    .badge-test-yes  { background: #d1fae5; color: #065f46; }
-    .badge-test-no   { background: #fee2e2; color: #991b1b; }
-    .badge-test-na   { background: #f3f4f6; color: #6b7280; }
+    .badge-test-yes { background: #d1fae5; color: #065f46; }
+    .badge-test-no  { background: #fee2e2; color: #991b1b; }
+    .badge-test-na  { background: #f3f4f6; color: #6b7280; }
 
-    .badge-status { background: #f3f4f6; color: #374151; }
-    .badge-status.waiting { background: #fef9c3; color: #713f12; }
-    .badge-status.ready   { background: #d1fae5; color: #065f46; }
-    .badge-status.inwork  { background: #e0e7ff; color: #3730a3; }
+    .badge-status          { background: #f3f4f6; color: #374151; }
+    .badge-status.waiting  { background: #fef9c3; color: #713f12; }
+    .badge-status.ready    { background: #d1fae5; color: #065f46; }
+    .badge-status.inwork   { background: #e0e7ff; color: #3730a3; }
 
-    /* card body */
     .card-body {
       padding: 10px 14px 14px;
       flex: 1;
@@ -197,15 +210,8 @@
       gap: 6px;
     }
 
-    .card-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-    }
-
-    .card-year {
-      font-size: 0.82rem;
-      color: var(--muted);
-    }
+    .card-title { font-size: 1.05rem; font-weight: 700; }
+    .card-year  { font-size: 0.82rem; color: var(--muted); }
 
     .card-notes {
       font-size: 0.85rem;
@@ -239,7 +245,6 @@
     .card-actions .btn-del { color: #e53e3e; border-color: #fecaca; }
     .card-actions .btn-del:hover { background: #fef2f2; }
 
-    /* empty state */
     #empty {
       grid-column: 1/-1;
       text-align: center;
@@ -248,19 +253,19 @@
     }
 
     #empty svg { width: 56px; opacity: 0.25; margin-bottom: 12px; }
-    #empty p { font-size: 0.95rem; }
 
     /* ── MODAL ── */
     .modal-backdrop {
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.5);
-      display: flex;
+      display: none;
       align-items: flex-end;
       justify-content: center;
       z-index: 100;
-      padding: 0;
     }
+
+    .modal-backdrop.open { display: flex; }
 
     @media (min-width: 600px) {
       .modal-backdrop { align-items: center; padding: 20px; }
@@ -280,15 +285,9 @@
       .modal { border-radius: 16px; }
     }
 
-    .modal h2 {
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-bottom: 20px;
-    }
+    .modal h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 20px; }
 
-    .form-row {
-      margin-bottom: 14px;
-    }
+    .form-row { margin-bottom: 14px; }
 
     .form-row label {
       display: block;
@@ -313,10 +312,7 @@
       -webkit-appearance: none;
     }
 
-    .form-row textarea {
-      resize: vertical;
-      min-height: 90px;
-    }
+    .form-row textarea { resize: vertical; min-height: 90px; }
 
     .form-row input:focus,
     .form-row select:focus,
@@ -331,7 +327,6 @@
       gap: 12px;
     }
 
-    /* photo upload in modal */
     .photo-upload-area {
       border: 2px dashed var(--border);
       border-radius: 8px;
@@ -382,26 +377,18 @@
       border: none;
     }
 
-    .btn-save {
-      background: var(--accent);
-      color: #fff;
-    }
+    .btn-save   { background: var(--accent); color: #fff; }
+    .btn-cancel { background: #f0f0f0; color: var(--text); }
 
-    .btn-cancel {
-      background: #f0f0f0;
-      color: var(--text);
-    }
-
-    /* hidden file input */
-    .hidden-input { display: none; }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
 <header>
   <div>
-    <h1>🔧 הסדנה — מעקב אופנועים</h1>
-    <p id="count-label">טוען...</p>
+    <h1>🔧 הסדנה — מעקב אופנועים <span id="sync-dot"></span></h1>
+    <p id="count-label">מתחבר...</p>
   </div>
   <button id="add-btn">+ הוסף</button>
 </header>
@@ -417,8 +404,8 @@
 
 <div id="grid"></div>
 
-<!-- Add/Edit Modal -->
-<div class="modal-backdrop hidden-input" id="modal">
+<!-- Modal -->
+<div class="modal-backdrop" id="modal">
   <div class="modal">
     <h2 id="modal-title">אופנוע חדש</h2>
 
@@ -453,7 +440,7 @@
     </div>
 
     <div class="form-row">
-      <label>טסט (רישיון רכב)</label>
+      <label>טסט</label>
       <select id="f-test">
         <option value="yes">יש טסט תקף</option>
         <option value="no">אין טסט</option>
@@ -464,7 +451,7 @@
     <div class="form-row">
       <label>תמונה</label>
       <div class="photo-upload-area" id="photo-area">
-        <div class="photo-upload-label">
+        <div class="photo-upload-label" id="photo-label">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M3 16l4-4 4 4 4-6 4 6"/>
             <rect x="3" y="3" width="18" height="18" rx="2"/>
@@ -472,7 +459,7 @@
           <span>לחץ לבחירת תמונה</span>
         </div>
       </div>
-      <input type="file" id="f-photo" accept="image/*" class="hidden-input" />
+      <input type="file" id="f-photo" accept="image/*" class="hidden" />
     </div>
 
     <div class="form-row">
@@ -487,85 +474,116 @@
   </div>
 </div>
 
-<input type="file" id="card-photo-input" accept="image/*" class="hidden-input" />
+<input type="file" id="card-photo-input" accept="image/*" class="hidden" />
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
 <script>
-  const STORE_KEY = 'moto_tracker_v1';
-  let bikes = JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
+  // ── Firebase config ───────────────────────────────────────
+  const firebaseConfig = {
+    apiKey: "AIzaSyDEWyp3YCbxvI5b2HR36F6EFKyxINCBU3s",
+    authDomain: "eitan-workshop.firebaseapp.com",
+    projectId: "eitan-workshop",
+    storageBucket: "eitan-workshop.firebasestorage.app",
+    messagingSenderId: "990271100135",
+    appId: "1:990271100135:web:7cac98741920918b7b7e42"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db      = firebase.firestore();
+  const storage = firebase.storage();
+  const col     = db.collection('bikes');
+
+  // ── State ─────────────────────────────────────────────────
+  let bikes = [];
   let editingId = null;
-  let pendingPhotoCardId = null;
+  let pendingPhotoFile = null;   // file chosen in modal
+  let pendingPhotoCardId = null; // card photo replacement
 
-  // ── Persistence ──────────────────────────────────────────
-  function save() {
-    localStorage.setItem(STORE_KEY, JSON.stringify(bikes));
+  // ── Sync dot ──────────────────────────────────────────────
+  function setSyncDot(state) {
+    const dot = document.getElementById('sync-dot');
+    dot.className = state === 'ok' ? '' : state;
   }
 
-  function newId() {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2);
+  // ── Real-time listener ────────────────────────────────────
+  col.orderBy('createdAt', 'desc').onSnapshot(snapshot => {
+    bikes = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    setSyncDot('ok');
+    render();
+  }, err => {
+    console.error(err);
+    setSyncDot('error');
+  });
+
+  // ── Upload photo to Storage ───────────────────────────────
+  async function uploadPhoto(file, bikeId) {
+    const ref = storage.ref(`bikes/${bikeId}/${Date.now()}_${file.name}`);
+    await ref.put(file);
+    return await ref.getDownloadURL();
   }
 
-  // ── Render ───────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────
   let currentFilter = 'all';
 
   function render() {
     const grid = document.getElementById('grid');
     const filtered = bikes.filter(b => {
-      if (currentFilter === 'all')     return true;
-      if (currentFilter === 'own')     return b.owner === 'own';
-      if (currentFilter === 'other')   return b.owner === 'other';
+      if (currentFilter === 'all')   return true;
+      if (currentFilter === 'own')   return b.owner === 'own';
+      if (currentFilter === 'other') return b.owner === 'other';
       return b.status === currentFilter;
     });
 
+    const total = bikes.length;
     document.getElementById('count-label').textContent =
-      bikes.length === 0 ? 'אין אופנועים עדיין'
-      : `${bikes.length} אופנוע${bikes.length !== 1 ? 'ים' : ''}`;
+      total === 0 ? 'אין אופנועים עדיין' : `${total} אופנוע${total !== 1 ? 'ים' : ''}`;
 
     grid.innerHTML = '';
 
     if (filtered.length === 0) {
-      grid.innerHTML = `
-        <div id="empty">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
-            <circle cx="12" cy="12" r="9"/>
-            <path d="M8 12h8M12 8v8"/>
-          </svg>
-          <p>אין אופנועים להצגה בסינון הנוכחי.</p>
-        </div>`;
+      grid.innerHTML = `<div id="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+          <circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/>
+        </svg>
+        <p>אין אופנועים להצגה בסינון הנוכחי.</p>
+      </div>`;
       return;
     }
+
+    const statusLabel = { inwork: 'בעבודה', waiting: 'ממתין לחלקים', ready: 'מוכן', other: 'אחר' };
+    const statusClass = { inwork: 'inwork', waiting: 'waiting', ready: 'ready', other: '' };
+    const testLabel   = { yes: '✓ טסט תקף', no: '✗ אין טסט', na: 'טסט N/A' };
+    const testClass   = { yes: 'badge-test-yes', no: 'badge-test-no', na: 'badge-test-na' };
 
     filtered.forEach(b => {
       const card = document.createElement('div');
       card.className = 'card';
-      card.dataset.id = b.id;
-
-      const statusLabel = { inwork: 'בעבודה', waiting: 'ממתין לחלקים', ready: 'מוכן', other: b.statusOther || 'אחר' };
-      const statusClass = { inwork: 'inwork', waiting: 'waiting', ready: 'ready', other: '' };
-      const testLabel   = { yes: '✓ טסט תקף', no: '✗ אין טסט', na: 'טסט N/A' };
-      const testClass   = { yes: 'badge-test-yes', no: 'badge-test-no', na: 'badge-test-na' };
-
       card.innerHTML = `
         <div class="card-photo" data-id="${b.id}" data-action="photo">
           ${b.photo
-            ? `<img src="${b.photo}" alt="${b.model}" />`
+            ? `<img src="${b.photo}" alt="${escHtml(b.model || '')}" />`
             : `<div class="photo-placeholder">
-                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
-                   <rect x="3" y="3" width="18" height="18" rx="2"/>
-                   <circle cx="8.5" cy="8.5" r="1.5"/>
-                   <path d="M21 15l-5-5L5 21"/>
-                 </svg>
-                 <span>הוסף תמונה</span>
-               </div>`}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <path d="M21 15l-5-5L5 21"/>
+                </svg>
+                <span>הוסף תמונה</span>
+              </div>`}
           <div class="photo-overlay"><span>החלף תמונה</span></div>
         </div>
         <div class="card-badges">
           <span class="badge ${b.owner === 'own' ? 'badge-own' : 'badge-other'}">${b.owner === 'own' ? 'שלנו' : 'של לקוח'}</span>
-          <span class="badge badge-status ${statusClass[b.status]}">${statusLabel[b.status] || b.status}</span>
-          <span class="badge ${testClass[b.test]}">${testLabel[b.test]}</span>
+          <span class="badge badge-status ${statusClass[b.status] || ''}">${statusLabel[b.status] || b.status}</span>
+          <span class="badge ${testClass[b.test] || 'badge-test-na'}">${testLabel[b.test] || ''}</span>
         </div>
         <div class="card-body">
-          <div class="card-title">${b.model || '(ללא שם)'}</div>
-          <div class="card-year">${b.year ? 'שנה: ' + b.year : ''}</div>
+          <div class="card-title">${escHtml(b.model || '(ללא שם)')}</div>
+          ${b.year ? `<div class="card-year">שנה: ${b.year}</div>` : ''}
           ${b.notes ? `<div class="card-notes">${escHtml(b.notes)}</div>` : ''}
           <div class="card-actions">
             <button data-id="${b.id}" data-action="edit">✏️ עריכה</button>
@@ -577,10 +595,10 @@
   }
 
   function escHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // ── Filter buttons ────────────────────────────────────────
+  // ── Filter ────────────────────────────────────────────────
   document.querySelectorAll('.filter-bar button').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.filter-bar button').forEach(b => b.classList.remove('active'));
@@ -590,24 +608,25 @@
     });
   });
 
-  // ── Grid interactions (delegation) ───────────────────────
+  // ── Grid click delegation ─────────────────────────────────
   document.getElementById('grid').addEventListener('click', e => {
     const btn = e.target.closest('[data-action]');
     if (!btn) return;
-    const id = btn.dataset.id;
-    const action = btn.dataset.action;
+    const { id, action } = btn.dataset;
     if (action === 'edit')   openModal(id);
     if (action === 'delete') deleteBike(id);
-    if (action === 'photo')  openPhotoForCard(id);
+    if (action === 'photo')  openCardPhoto(id);
   });
 
-  // ── Modal ────────────────────────────────────────────────
+  // ── Modal ─────────────────────────────────────────────────
   const modal = document.getElementById('modal');
 
   function openModal(id) {
     editingId = id || null;
+    pendingPhotoFile = null;
     document.getElementById('modal-title').textContent = id ? 'עריכת אופנוע' : 'אופנוע חדש';
     const b = id ? bikes.find(x => x.id === id) : null;
+
     document.getElementById('f-model').value  = b?.model  || '';
     document.getElementById('f-year').value   = b?.year   || '';
     document.getElementById('f-status').value = b?.status || 'inwork';
@@ -616,25 +635,26 @@
     document.getElementById('f-notes').value  = b?.notes  || '';
 
     const area = document.getElementById('photo-area');
-    const existingImg = area.querySelector('img');
-    if (existingImg) existingImg.remove();
+    const oldImg = area.querySelector('img');
+    if (oldImg) oldImg.remove();
     if (b?.photo) {
       const img = document.createElement('img');
       img.src = b.photo;
       area.insertBefore(img, area.firstChild);
+      document.getElementById('photo-label').style.display = 'none';
+    } else {
+      document.getElementById('photo-label').style.display = '';
     }
-    modal._pendingPhoto = b?.photo || null;
 
-    modal.style.display = 'flex';
-    modal.classList.remove('hidden-input');
+    modal.classList.add('open');
     document.body.style.overflow = 'hidden';
   }
 
   function closeModal() {
-    modal.style.display = 'none';
+    modal.classList.remove('open');
     document.body.style.overflow = '';
     editingId = null;
-    modal._pendingPhoto = null;
+    pendingPhotoFile = null;
     document.getElementById('f-photo').value = '';
   }
 
@@ -642,7 +662,7 @@
   document.getElementById('cancel-btn').addEventListener('click', closeModal);
   modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
-  // Photo in modal
+  // photo picker in modal
   document.getElementById('photo-area').addEventListener('click', () => {
     document.getElementById('f-photo').click();
   });
@@ -650,75 +670,100 @@
   document.getElementById('f-photo').addEventListener('change', e => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      modal._pendingPhoto = ev.target.result;
-      const area = document.getElementById('photo-area');
-      let img = area.querySelector('img');
-      if (!img) { img = document.createElement('img'); area.insertBefore(img, area.firstChild); }
-      img.src = ev.target.result;
-    };
-    reader.readAsDataURL(file);
+    pendingPhotoFile = file;
+    const area = document.getElementById('photo-area');
+    let img = area.querySelector('img');
+    if (!img) { img = document.createElement('img'); area.insertBefore(img, area.firstChild); }
+    img.src = URL.createObjectURL(file);
+    document.getElementById('photo-label').style.display = 'none';
   });
 
-  // Save
-  document.getElementById('save-btn').addEventListener('click', () => {
+  // ── Save ──────────────────────────────────────────────────
+  document.getElementById('save-btn').addEventListener('click', async () => {
     const model = document.getElementById('f-model').value.trim();
     if (!model) { document.getElementById('f-model').focus(); return; }
 
-    const data = {
-      model,
-      year:   document.getElementById('f-year').value.trim(),
-      status: document.getElementById('f-status').value,
-      owner:  document.getElementById('f-owner').value,
-      test:   document.getElementById('f-test').value,
-      notes:  document.getElementById('f-notes').value.trim(),
-      photo:  modal._pendingPhoto || null,
-    };
+    const saveBtn = document.getElementById('save-btn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'שומר...';
+    setSyncDot('syncing');
 
-    if (editingId) {
-      const idx = bikes.findIndex(b => b.id === editingId);
-      if (idx !== -1) bikes[idx] = { ...bikes[idx], ...data };
-    } else {
-      bikes.unshift({ id: newId(), ...data });
+    try {
+      const docId = editingId || col.doc().id;
+      let photoURL = null;
+
+      if (pendingPhotoFile) {
+        photoURL = await uploadPhoto(pendingPhotoFile, docId);
+      } else if (editingId) {
+        photoURL = bikes.find(b => b.id === editingId)?.photo || null;
+      }
+
+      const data = {
+        model,
+        year:      document.getElementById('f-year').value.trim(),
+        status:    document.getElementById('f-status').value,
+        owner:     document.getElementById('f-owner').value,
+        test:      document.getElementById('f-test').value,
+        notes:     document.getElementById('f-notes').value.trim(),
+        photo:     photoURL,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      };
+
+      if (!editingId) data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+
+      await col.doc(docId).set(data, { merge: true });
+      closeModal();
+    } catch (err) {
+      console.error(err);
+      alert('שגיאה בשמירה: ' + err.message);
+      setSyncDot('error');
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'שמור';
     }
-    save();
-    render();
-    closeModal();
   });
 
-  // ── Per-card photo update ─────────────────────────────────
-  function openPhotoForCard(id) {
+  // ── Per-card photo ─────────────────────────────────────────
+  function openCardPhoto(id) {
     pendingPhotoCardId = id;
     document.getElementById('card-photo-input').click();
   }
 
-  document.getElementById('card-photo-input').addEventListener('change', e => {
+  document.getElementById('card-photo-input').addEventListener('change', async e => {
     const file = e.target.files[0];
     if (!file || !pendingPhotoCardId) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const idx = bikes.findIndex(b => b.id === pendingPhotoCardId);
-      if (idx !== -1) { bikes[idx].photo = ev.target.result; save(); render(); }
-      pendingPhotoCardId = null;
-      e.target.value = '';
-    };
-    reader.readAsDataURL(file);
+
+    const id = pendingPhotoCardId;
+    pendingPhotoCardId = null;
+    e.target.value = '';
+
+    // show spinner on card
+    const cardPhoto = document.querySelector(`.card-photo[data-id="${id}"]`);
+    if (cardPhoto) {
+      const spinner = document.createElement('div');
+      spinner.className = 'photo-uploading';
+      spinner.innerHTML = '<div class="spinner"></div><span>מעלה...</span>';
+      cardPhoto.appendChild(spinner);
+    }
+
+    try {
+      const url = await uploadPhoto(file, id);
+      await col.doc(id).update({ photo: url, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    } catch (err) {
+      alert('שגיאה בהעלאת תמונה: ' + err.message);
+    }
   });
 
-  // ── Delete ────────────────────────────────────────────────
-  function deleteBike(id) {
+  // ── Delete ─────────────────────────────────────────────────
+  async function deleteBike(id) {
     const b = bikes.find(x => x.id === id);
-    if (!b) return;
-    if (!confirm(`למחוק את "${b.model}"?`)) return;
-    bikes = bikes.filter(x => x.id !== id);
-    save();
-    render();
+    if (!b || !confirm(`למחוק את "${b.model}"?`)) return;
+    try {
+      await col.doc(id).delete();
+    } catch (err) {
+      alert('שגיאה במחיקה: ' + err.message);
+    }
   }
-
-  // ── Init ─────────────────────────────────────────────────
-  modal.style.display = 'none';
-  render();
 </script>
 </body>
 </html>
