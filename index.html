@@ -7,6 +7,78 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* ── LOGIN SCREEN ── */
+    #login-screen {
+      position: fixed;
+      inset: 0;
+      background: #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      flex-direction: column;
+      gap: 20px;
+      padding: 24px;
+    }
+
+    #login-screen h2 {
+      color: #fff;
+      font-size: 1.3rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    #login-screen p {
+      color: #aaa;
+      font-size: 0.85rem;
+      text-align: center;
+      margin-top: -10px;
+    }
+
+    #login-box {
+      background: #2a2a2a;
+      border-radius: 14px;
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 340px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    #login-box input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 1.5px solid #444;
+      background: #1a1a1a;
+      color: #fff;
+      font-size: 1rem;
+      font-family: inherit;
+      letter-spacing: 2px;
+      text-align: center;
+    }
+
+    #login-box input:focus { outline: none; border-color: #e85d04; }
+
+    #login-btn {
+      background: #e85d04;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 13px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    #login-error {
+      color: #f87171;
+      font-size: 0.82rem;
+      text-align: center;
+      min-height: 18px;
+    }
+
     :root {
       --bg: #f4f4f4;
       --card: #ffffff;
@@ -728,6 +800,17 @@
 </head>
 <body>
 
+<!-- Login Screen -->
+<div id="login-screen">
+  <h2>🔧 הסדנה</h2>
+  <p>מעקב אופנועים</p>
+  <div id="login-box">
+    <input type="password" id="login-input" placeholder="סיסמא" onkeydown="if(event.key==='Enter')doLogin()" />
+    <button id="login-btn" onclick="doLogin()">כניסה</button>
+    <div id="login-error"></div>
+  </div>
+</div>
+
 <header>
   <div>
     <h1>🔧 הסדנה — מעקב אופנועים <span id="sync-dot"></span></h1>
@@ -910,6 +993,26 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
 <script>
+// ── Login ────────────────────────────────────────────────
+const PASSWORD = 'Eitan1975';
+
+function doLogin() {
+  const val = document.getElementById('login-input').value;
+  if (val === PASSWORD) {
+    sessionStorage.setItem('auth', '1');
+    document.getElementById('login-screen').style.display = 'none';
+  } else {
+    document.getElementById('login-error').textContent = 'סיסמא שגויה, נסה שוב';
+    document.getElementById('login-input').value = '';
+    document.getElementById('login-input').focus();
+  }
+}
+
+// Check if already logged in this session
+if (sessionStorage.getItem('auth') === '1') {
+  document.getElementById('login-screen').style.display = 'none';
+}
+
 // ── Motorcycle DB ────────────────────────────────────────
 const MOTO_DB = {
   "Honda": ["CB125R","CB300R","CB500F","CB500X","CB650R","CB750 Hornet","CB1000R","CBR500R","CBR650R","CBR1000RR Fireblade","CRF300L","CRF300 Rally","CRF450L","Africa Twin 1100","NC750X","NC750S","Forza 125","Forza 350","Forza 750","PCX125","SH125","SH350","Gold Wing","Rebel 500","Rebel 1100","Shadow","VFR800","X-ADV"],
